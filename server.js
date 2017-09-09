@@ -2,20 +2,21 @@
  * =============================================== */
 
 // Dependencies
-var express = require("express");
-var bodyParser = require("body-parser");
-var logger = require("morgan");
-var mongoose = require("mongoose");
-var Comment = require("./models/Comment.js");
-var Article = require("./models/Article.js");
-// Scraping tools
-var request = require("request");
-var cheerio = require("cheerio");
+const express = require("express"),
+  bodyParser = require("body-parser"),
+  logger = require("morgan"),
+  mongoose = require("mongoose"),
+  app = express(),
+  Comment = require("./models/Comment.js"),
+  Article = require("./models/Article.js"),
+  // Scraping tools
+  request = require("request"),
+  rp = require('request-promise'),
+  cheerio = require("cheerio"),
+  WordPOS = require('wordpos'),
+  wordpos = new WordPOS();
 // Set mongoose to leverage built in JS Promises
 mongoose.Promise = Promise;
-
-// Initialize Express
-var app = express();
 
 // Use morgan and body parser with our app
 app.use(logger("dev"));
@@ -31,62 +32,107 @@ mongoose.connect("mongodb://localhost/falseadvertising");
 var db = mongoose.connection;
 
 // Show any mongoose errors
-db.on("error", function(error) {
+db.on("error", function (error) {
   console.log("Mongoose Error: ", error);
 });
 
 // Once logged in to the db through mongoose, log a success message
-db.once("open", function() {
+db.once("open", function () {
   console.log("Mongoose connection successful.");
 });
 
 
 // Routes
 // ======
-
 // A GET request to scrape the echojs website
-app.get("/scrape", function(req, res) {
+var allResults = [];
+app.get("/scrape", function (req, res) {
   // Grab the body of the html with request
-  request("https://losangeles.craigslist.org/search/sss", function(error, response, html) {
+
+  rp("https://losangeles.craigslist.org/search/sss", function (error, response, html) {
     // Load that into cheerio and save it to $ for a shorthand selector
     var $ = cheerio.load(html);
+
     // console.log(html)
-    $(".result-row").each(function(i, element) {
+    $(".result-row").each(function (i, element) {
       // Save an empty result object
       var result = {};
-      // console.log(i, element);
-      // result.title = $(this).children("a").text();
-      // Find what we need //
-      // result.title = $(this).attr('class');
+
       result.title = $(this).children('p.result-info').children("a.result-title.hdrlnk").text().trim();
       // result.title = $(this, 'a.result-title.hdrlnk').html();
       result.link = "https://losangeles.craigslist.org" + $(this).children("a").attr("href");
-      // result.nouns;
-      console.log(result);
+      // result.nouns = wordpos.getNouns(result.title);
+      result.nouns = wordpos.getNouns(result.title).then(function (theNouns) {
+        // result.imgSearch = "https://www.pexels.com/search/" + result.nouns[0];
+        console.log(theNouns)
+        if (theNouns.length === 0) {
+          // console.log(result.title)
+          result.nouns = ["empty"];
+        } else {
+          result.nouns = theNouns;
+        }
 
-      // to do, create a new entry and add to db
+      }).then(function () {
+        var options = {
+          uri: 'https://www.pexels.com/search/' + result.nouns[0],
+          transform: function (body) {
+            return cheerio.load(body);
+          }
+        };
+        rp(options).then(function ($) {
+          if ($("img.photo-item__img").attr('src') === undefined) {
+            result.imgURL = "https://images.pexels.com/photos/6069/grass-lawn-green-wooden-6069.jpg";
+          } else {
+            // console.log($("img.photo-item__img").attr('src'));
+            result.imgURL = $("img.photo-item__img").attr('src').split('?h')[0];
+          }
+          // console.log(result);
+        }).then(function () {
+          var entry = new Article(result);
 
-      // // Now, save that entry to the db
-      // entry.save(function(err, doc) {
-      //   // Log any errors
-      //   if (err) {
-      //     console.log(err);
-      //   }
-      //   // Or log the doc
-      //   else {
-      //     console.log(doc);
-      //   }
-      // });
+          // Now, save that entry to the db
+          entry.save(function (err, doc) {
+            // Log any errors
+            if (err) {
+              console.log(err);
+            }
+            // Or log the doc
+            else {
+              console.log(doc);
+            }
+          });
+        });
 
+      })
+      // console.log("____________", result.nouns)
     });
+    // console.log(allResults);
   });
-  // res.json(result);
+
+  // request("https://www.pexels.com/search/" + allResults[j].nouns[0], function (error, response, html) {
+  //   var $ = cheerio.load(html);
+  //   // allResults[i].image = "httl";
+  //   console.log(allResults[j]);
+
+  //   // console.log(allResults[i].nouns[0])
+  // });
+
+  // for (var j = 0; j < allResults.length; j++) {
+  //   if (allResults[j].nouns.length === 0) {
+  //     allResults[j].nouns.push("Empty");
+  //     // console.log(allResults[j]);
+  //   }
+  //   console.log(allResults[j].title);
+
+  // }
+  res.json(allResults);
 });
 
+
 // This will get the articles we scraped from the mongoDB
-app.get("/articles", function(req, res) {
+app.get("/articles", function (req, res) {
   // Grab every doc in the Articles array
-  Article.find({}, function(error, doc) {
+  Article.find({}, function (error, doc) {
     // Log any errors
     if (error) {
       console.log(error);
@@ -99,32 +145,34 @@ app.get("/articles", function(req, res) {
 });
 
 // Grab an article by it's ObjectId
-app.get("/articles/:id", function(req, res) {
+app.get("/articles/:id", function (req, res) {
   // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
-  Article.findOne({ "_id": req.params.id })
-  // ..and populate all of the notes associated with it
-  .populate("comment")
-  // now, execute our query
-  .exec(function(error, doc) {
-    // Log any errors
-    if (error) {
-      console.log(error);
-    }
-    // Otherwise, send the doc to the browser as a json object
-    else {
-      res.json(doc);
-    }
-  });
+  Article.findOne({
+      "_id": req.params.id
+    })
+    // ..and populate all of the notes associated with it
+    .populate("comment")
+    // now, execute our query
+    .exec(function (error, doc) {
+      // Log any errors
+      if (error) {
+        console.log(error);
+      }
+      // Otherwise, send the doc to the browser as a json object
+      else {
+        res.json(doc);
+      }
+    });
 });
 
 
 // Create a new note or replace an existing note
-app.post("/articles/:id", function(req, res) {
+app.post("/articles/:id", function (req, res) {
   // Create a new note and pass the req.body to the entry
   var newComment = new Comment(req.body);
 
   // And save the new note the db
-  newComment.save(function(error, doc) {
+  newComment.save(function (error, doc) {
     // Log any errors
     if (error) {
       console.log(error);
@@ -132,24 +180,27 @@ app.post("/articles/:id", function(req, res) {
     // Otherwise
     else {
       // Use the article id to find and update it's note
-      Article.findOneAndUpdate({ "_id": req.params.id }, { "comment": doc._id })
-      // Execute the above query
-      .exec(function(err, doc) {
-        // Log any errors
-        if (err) {
-          console.log(err);
-        }
-        else {
-          // Or send the document to the browser
-          res.send(doc);
-        }
-      });
+      Article.findOneAndUpdate({
+          "_id": req.params.id
+        }, {
+          "comment": doc._id
+        })
+        // Execute the above query
+        .exec(function (err, doc) {
+          // Log any errors
+          if (err) {
+            console.log(err);
+          } else {
+            // Or send the document to the browser
+            res.send(doc);
+          }
+        });
     }
   });
 });
 
 
 // Listen on port 3000
-app.listen(3000, function() {
+app.listen(3000, function () {
   console.log("App running on port 3000!");
 });
