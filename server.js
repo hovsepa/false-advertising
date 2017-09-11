@@ -29,7 +29,7 @@ app.use(bodyParser.urlencoded({
 app.use(express.static("public"));
 
 // Database configuration with mongoose
-mongoose.connect("mongodb://localhost/falseadvertising");
+mongoose.connect("mongodb://heroku_mglfsnp6:a3t1rid6trq0ff5d4qbif0sv8v@ds133094.mlab.com:33094/heroku_mglfsnp6");
 var db = mongoose.connection;
 
 // Show any mongoose errors
