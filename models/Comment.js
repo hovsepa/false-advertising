@@ -6,13 +6,18 @@ var Schema = mongoose.Schema;
 // Create the Comment schema
 var CommentSchema = new Schema({
   // Just a string
-  title: {
-    type: String,
-    required: true
-  },
+  // title: {
+  //   type: String,
+  //   required: true
+  // },
   body: {
     type: String,
     required: true
+  },
+  date: {
+    type: Date,
+    // `Date.now()` returns the current unix timestamp as a number
+    default: Date.now
   }
 });
 

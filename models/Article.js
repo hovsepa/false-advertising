@@ -22,11 +22,16 @@ var ArticleSchema = new Schema({
   nouns: {
     type: Array
   },
+  date: {
+    type: Date,
+    // `Date.now()` returns the current unix timestamp as a number
+    default: Date.now
+  },
   // This only saves one note's ObjectId, ref refers to the Note model
-  comment: {
+  comment: [{
     type: Schema.Types.ObjectId,
     ref: "Comment"
-  }
+  }]
 });
 
 // Create the Article model with the ArticleSchema

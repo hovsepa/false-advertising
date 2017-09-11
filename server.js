@@ -15,6 +15,7 @@ const express = require("express"),
   cheerio = require("cheerio"),
   WordPOS = require('wordpos'),
   wordpos = new WordPOS();
+
 // Set mongoose to leverage built in JS Promises
 mongoose.Promise = Promise;
 
@@ -41,11 +42,10 @@ db.once("open", function () {
   console.log("Mongoose connection successful.");
 });
 
-
 // Routes
 // ======
 // A GET request to scrape the echojs website
-var allResults = [];
+// var allResults = [];
 app.get("/scrape", function (req, res) {
   // Grab the body of the html with request
 
@@ -81,10 +81,11 @@ app.get("/scrape", function (req, res) {
         };
         rp(options).then(function ($) {
           if ($("img.photo-item__img").attr('src') === undefined) {
-            result.imgURL = "https://images.pexels.com/photos/6069/grass-lawn-green-wooden-6069.jpg";
+            result.imgURL = "https://images.pexels.com/photos/6069/grass-lawn-green-wooden-6069.jpg?h=350&auto=compress&cs=tinysrgb";
           } else {
             // console.log($("img.photo-item__img").attr('src'));
-            result.imgURL = $("img.photo-item__img").attr('src').split('?h')[0];
+            // result.imgURL = $("img.photo-item__img").attr('src').split('?h')[0];
+            result.imgURL = $("img.photo-item__img").attr('src');
           }
           // console.log(result);
         }).then(function () {
@@ -101,45 +102,27 @@ app.get("/scrape", function (req, res) {
               console.log(doc);
             }
           });
+        }).then(function () {
+          res.redirect("/");
         });
-
       })
-      // console.log("____________", result.nouns)
     });
-    // console.log(allResults);
   });
-
-  // request("https://www.pexels.com/search/" + allResults[j].nouns[0], function (error, response, html) {
-  //   var $ = cheerio.load(html);
-  //   // allResults[i].image = "httl";
-  //   console.log(allResults[j]);
-
-  //   // console.log(allResults[i].nouns[0])
-  // });
-
-  // for (var j = 0; j < allResults.length; j++) {
-  //   if (allResults[j].nouns.length === 0) {
-  //     allResults[j].nouns.push("Empty");
-  //     // console.log(allResults[j]);
-  //   }
-  //   console.log(allResults[j].title);
-
-  // }
-  res.json(allResults);
 });
-
 
 // This will get the articles we scraped from the mongoDB
 app.get("/articles", function (req, res) {
   // Grab every doc in the Articles array
-  Article.find({}, function (error, doc) {
+  Article.find({}).sort({
+    date: -1
+  }).exec(function (err, docs) {
     // Log any errors
-    if (error) {
-      console.log(error);
+    if (err) {
+      console.log(err);
     }
     // Or send the doc to the browser as a json object
     else {
-      res.json(doc);
+      res.json(docs);
     }
   });
 });
@@ -165,7 +148,6 @@ app.get("/articles/:id", function (req, res) {
     });
 });
 
-
 // Create a new note or replace an existing note
 app.post("/articles/:id", function (req, res) {
   // Create a new note and pass the req.body to the entry
@@ -183,7 +165,9 @@ app.post("/articles/:id", function (req, res) {
       Article.findOneAndUpdate({
           "_id": req.params.id
         }, {
-          "comment": doc._id
+          $push: {
+            "comment": doc._id
+          }
         })
         // Execute the above query
         .exec(function (err, doc) {
@@ -199,6 +183,17 @@ app.post("/articles/:id", function (req, res) {
   });
 });
 
+app.delete("/comments/delete/:id", function (req, res) {
+  Comment.findOneAndRemove({
+    _id: req.params.id
+  }, function (err, comment) {
+    if (!err) {
+      console.log(comment);
+    } else {
+      console.log(err);
+    }
+  });
+});
 
 // Listen on port 3000
 app.listen(3000, function () {

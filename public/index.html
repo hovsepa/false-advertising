@@ -1,55 +1,100 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
-    <meta charset="UTF-8">
-    <title>Scraping With Mongoose</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <style>
-      body { background-color: #F2F6D0 }
-      #wrapper {
-        width: 960px;
-        margin-left: auto;
-        margin-right: auto;
-        padding-top: 5%;
-      }
-      #articles {
-        display: inline-block;
-        overflow: auto;
-        width: 60%;
-        height: 700px;
-      }
-      #notes {
-        float: right;
-        width: 30%;
-      }
-      .pexelImg {
-        /* width: 20%; */
-        width: 30%;
-      }
-      textarea, input {
-        display: block;
-        width: 100%;
-        background-color: #FCF5C7;
-      }
-      input {
-        height: 36px;
-        font-size: 24px;
-      }
-      textarea {
-        height: 200px;
-        font-size: 18px;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="wrapper">
-      <h1>Note Scraper</h1>
-      <h2><i>If you can do this...the homework should be no problem.</i></h2>
-      <div id="articles"></div>
-      <div id="notes"></div>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Scraping With Mongoose</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+    crossorigin="anonymous">
+  <style>
+    /* body { background-color: #F2F6D0 } */
+
+    #wrapper {
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+      padding-top: 2%;
+    }
+
+    #articles {
+      display: inline-block;
+      overflow: auto;
+      width: 60%;
+      height: 700px;
+    }
+
+    #notes {
+      float: right;
+      width: 35%;
+
+    }
+
+    .pexelImg {
+      width: 100%;
+    }
+
+    textarea,
+    input {
+      display: block;
+      width: 100%;
+    }
+
+    input {
+      height: 36px;
+      font-size: 24px;
+    }
+
+    textarea {
+      height: 200px;
+      font-size: 18px;
+    }
+
+    .past-comment {
+      margin-bottom: 1em;
+    }
+
+    .comment-past-title {
+      font-weight: 700;
+    }
+    .past-comment-date {
+      font-weight: 300;
+      font-size: .8em;
+      color: gray;
+    }
+    .jumbotron {
+      background: url("./images/connections.jpg");
+    }
+    #deletenote {
+      float: right;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="row jumbo-image">
+    <div class="jumbotron">
+      <div class="container">
+        <div class="col-md-8">
+          <h1><span class="glyphicon glyphicon-link" aria-hidden="true"></span> Find the Relationship</h1>
+          <p>Here's how it works. Everytime you click scrape, we scrape Craigslist's for sale section, then find images for
+            the words that match that title. Your Task: Be the first to leave a comment on the link between the title and
+            the image.</p>
+            <button type="button" id="scrape" class="btn btn-warning btn-lg">Scrape Now</button>
+        </div>
+
+      </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    <script src="app.js"></script>
-  </body>
+  </div>
+
+  <div id="wrapper">
+    <div id="articles"></div>
+    <div id="notes"></div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+    crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js"></script>
+  <script src="app.js"></script>
+</body>
+
 </html>
