@@ -104,9 +104,7 @@ app.get("/scrape", function (req, res) {
               console.log(doc);
             }
           });
-        }).then(function () {
-          res.json(doc);
-        });
+        })
       })
     });
   });
