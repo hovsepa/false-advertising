@@ -105,7 +105,7 @@ app.get("/scrape", function (req, res) {
             }
           });
         }).then(function () {
-          res.redirect("/");
+          res.json(doc);
         });
       })
     });
