@@ -34,6 +34,7 @@ var db = mongoose.connection;
 var MONGODB_URI = "mongodb://heroku_mglfsnp6:a3t1rid6trq0ff5d4qbif0sv8v@ds133094.mlab.com:33094/heroku_mglfsnp6";
 mongoose.connect(process.env.MONGODB_URI);
 
+// mongoose.connect("mongodb://localhost/falseadvertising");
 // Show any mongoose errors
 db.on("error", function (error) {
   console.log("Mongoose Error: ", error);
@@ -56,7 +57,7 @@ app.get("/scrape", function (req, res) {
     var $ = cheerio.load(html);
 
     // console.log(html)
-    $(".result-row").each(function (i, element) {
+    $(".result-row").slice(0, 25).each(function (i, element) {
       // Save an empty result object
       var result = {};
 
@@ -104,6 +105,8 @@ app.get("/scrape", function (req, res) {
               console.log(doc);
             }
           });
+        }).then(function(docs){
+          res.redirect("/");
         })
       })
     });
