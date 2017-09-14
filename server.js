@@ -52,18 +52,19 @@ db.once("open", function () {
 app.get("/scrape", function (req, res) {
   // Grab the body of the html with request
 
-  rp("https://losangeles.craigslist.org/search/sss", function (error, response, html) {
+  rp("https://news.ycombinator.com/", function (error, response, html) {
     // Load that into cheerio and save it to $ for a shorthand selector
     var $ = cheerio.load(html);
 
     // console.log(html)
-    $(".result-row").slice(0, 25).each(function (i, element) {
+    $(".storylink").slice(0, 25).each(function (i, element) {
       // Save an empty result object
       var result = {};
+      // console.log(element)
 
-      result.title = $(this).children('p.result-info').children("a.result-title.hdrlnk").text().trim();
+      result.title = $(this).text().trim();
       // result.title = $(this, 'a.result-title.hdrlnk').html();
-      result.link = "https://losangeles.craigslist.org" + $(this).children("a").attr("href");
+      result.link = $(this).attr("href");
       // result.nouns = wordpos.getNouns(result.title);
       result.nouns = wordpos.getNouns(result.title).then(function (theNouns) {
         // result.imgSearch = "https://www.pexels.com/search/" + result.nouns[0];
