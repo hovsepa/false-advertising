@@ -31,7 +31,7 @@ app.use(express.static("public"));
 // Database configuration with mongoose
 
 var db = mongoose.connection;
-var MONGODB_URI = "mongodb://heroku_mglfsnp6:a3t1rid6trq0ff5d4qbif0sv8v@ds133094.mlab.com:33094/heroku_mglfsnp6";
+var MONGODB_URI = "mongodb://heroku_r0r26ccv:pe1jec0io6nvs4tmjvs3gen7sq@ds135234.mlab.com:35234/heroku_r0r26ccv";
 // mongoose.connect(process.env.MONGODB_URI);
 
 mongoose.connect("mongodb://localhost/falseadvertising");
@@ -83,6 +83,7 @@ app.get("/scrape", function (req, res) {
             return cheerio.load(body);
           }
         };
+
         rp(options).then(function ($) {
           if ($("img.photo-item__img").attr('src') === undefined) {
             result.imgURL = "https://images.pexels.com/photos/6069/grass-lawn-green-wooden-6069.jpg?h=350&auto=compress&cs=tinysrgb";
@@ -106,11 +107,13 @@ app.get("/scrape", function (req, res) {
               console.log(doc);
             }
           });
+        }).then(function(){
+          res.redirect("/")
         })
       })
     });
   });
-  res.send("Scrape complete");
+  // res.send("Scrape complete");
 });
 
 // This will get the articles we scraped from the mongoDB
