@@ -32,9 +32,9 @@ app.use(express.static("public"));
 
 var db = mongoose.connection;
 var MONGODB_URI = "mongodb://heroku_mglfsnp6:a3t1rid6trq0ff5d4qbif0sv8v@ds133094.mlab.com:33094/heroku_mglfsnp6";
-// mongoose.connect(process.env.MONGODB_URI);
+mongoose.connect(process.env.MONGODB_URI);
 
-mongoose.connect("mongodb://localhost/falseadvertising");
+// mongoose.connect("mongodb://localhost/falseadvertising");
 // Show any mongoose errors
 db.on("error", function (error) {
   console.log("Mongoose Error: ", error);
@@ -108,7 +108,7 @@ app.get("/scrape", function (req, res) {
             }
           });
         }).then(function(){
-          res.redirect("/")
+          return res.redirect("/")
         })
       })
     });
@@ -128,7 +128,7 @@ app.get("/articles", function (req, res) {
     }
     // Or send the doc to the browser as a json object
     else {
-      res.json(docs);
+      return res.json(docs);
     }
   });
 });
@@ -149,7 +149,7 @@ app.get("/articles/:id", function (req, res) {
       }
       // Otherwise, send the doc to the browser as a json object
       else {
-        res.json(doc);
+        return res.json(doc);
       }
     });
 });
@@ -182,7 +182,7 @@ app.post("/articles/:id", function (req, res) {
             console.log(err);
           } else {
             // Or send the document to the browser
-            res.send(doc);
+            return res.send(doc);
           }
         });
     }
