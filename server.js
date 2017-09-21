@@ -31,8 +31,8 @@ app.use(express.static("public"));
 // Database configuration with mongoose
 
 var db = mongoose.connection;
-var MONGODB_URI = "mongodb://heroku_mglfsnp6:a3t1rid6trq0ff5d4qbif0sv8v@ds133094.mlab.com:33094/heroku_mglfsnp6";
-mongoose.connect(process.env.MONGODB_URI);
+
+mongoose.connect('mongodb://heroku_mglfsnp6:a3t1rid6trq0ff5d4qbif0sv8v@ds133094.mlab.com:33094/heroku_mglfsnp6', { useMongoClient: true })
 
 // mongoose.connect("mongodb://localhost/falseadvertising");
 // Show any mongoose errors
